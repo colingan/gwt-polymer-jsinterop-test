@@ -1,0 +1,40 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: "java"
+apply plugin: "gwt-compiler"
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+dependencies {
+    compile "com.google.gwt:gwt-user:2.7.0"
+}
+
+gwt {
+    gwtVersion = "2.7.0"
+    sourceLevel = JavaVersion.VERSION_1_7
+    maxHeapSize = "1024M"
+
+    modules "sometest.SomeModule"
+
+    superDev {
+        launcherDir = file("src/main/webapp")
+    }
+}
+
+tasks.withType(de.richsource.gradle.plugins.gwt.AbstractGwtActionTask) {
+    //args "-logLevel", "DEBUG"
+    args "-XjsInteropMode", "JS"
+    //jvmArgs("-Dgwt.persistentunitcachedir=$project.buildDir/gwt/cache")
+}
