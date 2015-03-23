@@ -8,6 +8,7 @@ public class EntryPoint implements com.google.gwt.core.client.EntryPoint {
 
     @Override
     public void onModuleLoad() {
+        LOG.info("### RESULT JS INTEROP WORKS AT ALL: " + getDocument().getBody());
         LOG.info("### RESULT JAVA: " + new sometest.client.Foo());
         LOG.info("### RESULT GWT: " + callExported());
         onModuleReady();
@@ -20,5 +21,10 @@ public class EntryPoint implements com.google.gwt.core.client.EntryPoint {
     private native void onModuleReady() /*-{
         $wnd.onGwtReady();
     }-*/;
+
+    private native Document getDocument() /*-{
+        return $doc;
+    }-*/;
+
 
 }
