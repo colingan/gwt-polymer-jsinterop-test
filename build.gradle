@@ -9,21 +9,25 @@ buildscript {
 
 repositories {
     mavenCentral()
+    maven {
+        url = "https://oss.sonatype.org/content/repositories/google-snapshots/"
+    }
 }
 
 apply plugin: "java"
 apply plugin: "gwt-compiler"
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    compile "com.google.gwt:gwt-user:2.7.0"
+    compile "com.google.gwt:gwt-user:2.8.0-SNAPSHOT"
 }
 
 gwt {
-    gwtVersion = "2.7.0"
-    sourceLevel = JavaVersion.VERSION_1_7
+
+    gwtVersion = "2.8.0-SNAPSHOT"
+    sourceLevel = JavaVersion.VERSION_1_8
     maxHeapSize = "1024M"
 
     modules "sometest.SomeModule"
@@ -34,7 +38,8 @@ gwt {
 }
 
 tasks.withType(de.richsource.gradle.plugins.gwt.AbstractGwtActionTask) {
-    //args "-logLevel", "DEBUG"
+//    args "-logLevel", "TRACE"
     args "-XjsInteropMode", "JS"
-    //jvmArgs("-Dgwt.persistentunitcachedir=$project.buildDir/gwt/cache")
+    args "-noincremental" // TODO Yep, incremental compile is apparently broken right now in 2.8.0
+//    jvmArgs("-Dgwt.persistentunitcachedir=$project.buildDir/gwt/cache")
 }

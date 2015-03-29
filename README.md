@@ -1,4 +1,4 @@
-# GWT JSInterop Test
+# GWT JSInterop & Polymer Test
 
 Run compiled version:
 

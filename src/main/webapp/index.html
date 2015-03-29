@@ -4,22 +4,104 @@
     <title>SomeTest</title>
 
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="bower_components/polymer/polymer.html">
 
     <!-- SDM launcher -->
 <!--
     <script type="text/javascript" language="javascript" src="SomeModule/SomeModule.nocache.js"></script>
 -->
+
     <!-- Compiled application -->
     <script type="text/javascript" language="javascript" src="SomeModule_compiled/SomeModule.nocache.js"></script>
 
-    <script>
-        function onGwtReady() {
-            console.log("### RESULT JS: " + new sometest.client.Foo());
-        }
+    <script>function onGwtReady() {
+
+        console.log("### ON GWT READY");
+        /* DEBUG
+        console.log("########################################");
+        console.dir(test);
+        console.log("########################################");
+        */
+
+        Polymer("some-test", {
+            created: function () {
+                this.myModel = new test.MyModel();
+
+                this.someHandler = new test.SomeHandler();
+                this.someHandler.register(test.SomeEventFoo.NAME, this.someEventCallback.bind(this));
+                this.someHandler.register(test.SomeEventBar.NAME, this.someEventCallback.bind(this));
+            },
+            updateModel: function () {
+                this.myModel.updateMyModel();
+            },
+            fireFoo: function() {
+                this.someHandler.consume(test.SomeEventFoo.NAME, new test.SomeEventFoo())
+            },
+            fireBar: function() {
+                this.someHandler.consume(test.SomeEventBar.NAME, new test.SomeEventBar())
+            },
+            someEventCallback: function(e) {
+                this.someEventResult = e.doStuff();
+            },
+            registerSomeTestListeners: function() {
+                this.someHandler.registerSomeModelUpdatingListeners(this.myModel);
+            },
+            fireSomeTestEvents: function() {
+                this.someHandler.fireSomeModelUpdatingEvents(this.myModel);
+            },
+            addOptionalListener: function() {
+                this.someListenerRegistration =
+                        this.someHandler.register(test.SomeEventFoo.NAME, this.someOptionalCallback.bind(this));
+            },
+            removeOptionalListener: function() {
+                if (this.someListenerRegistration) {
+                    this.someHandler.unregister(this.someListenerRegistration);
+                }
+            },
+            someOptionalCallback: function(e) {
+                this.myModel.updateMyModel();
+                this.optionalEventResult = e.doStuff();
+            }
+        });
+    }
     </script>
 
 </head>
 <body>
+
+<polymer-element name="some-test">
+    <template>
+        <h1>GWT JSInterop & Polymer Test</h1>
+        <hr/>
+        <span>MyModel#someProperty: {{myModel.someProperty}}</span>
+        <br/>
+        <span>MyModel#otherProperty: {{myModel.otherProperty}}</span>
+        <br/>
+        <button on-click="{{updateModel}}">Update model with random values</button>
+        <hr/>
+        <span>Callback result of SomeEvent#doStuff: {{someEventResult}}</span>
+        <br/>
+        <span>Optional callback result of SomeEvent#doStuff: {{optionalEventResult}}</span>
+        <br/>
+        <button on-click="{{fireFoo}}">Fire SomeEventFoo</button>
+        <br/>
+        <button on-click="{{fireBar}}">Fire SomeEventBar</button>
+        <br/>
+        <button on-click="{{registerSomeTestListeners}}">Register some Java listeners updating MyModel</button>
+        <br/>
+        <button on-click="{{fireSomeTestEvents}}">Fire some Java events updating MyModel</button>
+        <br/>
+        <button on-click="{{addOptionalListener}}">Enable optional listener</button>
+        <br/>
+        <button on-click="{{removeOptionalListener}}">Disable optional listener</button>
+    </template>
+</polymer-element>
+<some-test></some-test>
 
 </body>
 </html>
