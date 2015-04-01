@@ -32,7 +32,8 @@
             created: function () {
                 this.myModel = new test.MyModel();
 
-                this.myModel.someArray = ["Foo"];
+                this.myModel.someArray = ["Foo 123"];
+                this.myModel.otherArray = [new test.MyOtherModel(123)];
 
                 this.someHandler = new test.SomeHandler();
                 this.someHandler.register(test.SomeEventFoo.NAME, this.someEventCallback.bind(this));
