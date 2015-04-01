@@ -32,6 +32,8 @@
             created: function () {
                 this.myModel = new test.MyModel();
 
+                this.myModel.someArray = ["Foo"];
+
                 this.someHandler = new test.SomeHandler();
                 this.someHandler.register(test.SomeEventFoo.NAME, this.someEventCallback.bind(this));
                 this.someHandler.register(test.SomeEventBar.NAME, this.someEventCallback.bind(this));
@@ -82,6 +84,14 @@
         <br/>
         <span>MyModel#otherProperty: {{myModel.otherProperty}}</span>
         <br/>
+        <template repeat="{{e in myModel.someArray}}">
+            <span>MyModel#someArray: {{e}}</span>
+            <br/>
+        </template>
+        <template repeat="{{e in myModel.otherArray}}">
+            <span>MyModel#otherArray: MyOtherModel {{e.someNumber}}</span>
+            <br/>
+        </template>
         <button on-click="{{updateModel}}">Update model with random values</button>
         <hr/>
         <span>Callback result of SomeEvent#doStuff: {{someEventResult}}</span>
