@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="bower_components/polymer/polymer.html">
 
     <!-- SDM launcher -->
@@ -28,47 +28,75 @@
         console.log("########################################");
         */
 
-        Polymer("some-test", {
-            created: function () {
-                this.myModel = new test.MyModel();
-
-                this.myModel.someArray = ["Foo 123"];
-                this.myModel.otherArray = [new test.MyOtherModel(123)];
-
-                this.someHandler = new test.SomeHandler();
-                this.someHandler.register(test.SomeEventFoo.NAME, this.someEventCallback.bind(this));
-                this.someHandler.register(test.SomeEventBar.NAME, this.someEventCallback.bind(this));
+        Polymer({
+            is: "some-test",
+            properties: {
+                myModel: {
+                    type: Object,
+                    value: function() {
+                        var myModel = new test.MyModel();
+                        myModel.someArray = ["Foo 123"];
+                        myModel.otherArray = [new test.MyOtherModel(123)];
+                        return myModel;
+                    }
+                },
+                someHandler: {
+                    type: Object,
+                    value: function() {
+                        var someHandler = new test.SomeHandler();
+                        someHandler.register(test.SomeEventFoo.NAME, this.someEventCallback.bind(this));
+                        someHandler.register(test.SomeEventBar.NAME, this.someEventCallback.bind(this));
+                        return someHandler;
+                    }
+                }
             },
             updateModel: function () {
                 this.myModel.updateMyModel();
+                this.notifyModelUpdated();
             },
             fireFoo: function() {
                 this.someHandler.consume(test.SomeEventFoo.NAME, new test.SomeEventFoo())
+                this.notifyModelUpdated();
             },
             fireBar: function() {
                 this.someHandler.consume(test.SomeEventBar.NAME, new test.SomeEventBar())
+                this.notifyModelUpdated();
             },
             someEventCallback: function(e) {
                 this.someEventResult = e.doStuff();
+                this.notifyModelUpdated();
             },
             registerSomeTestListeners: function() {
                 this.someHandler.registerSomeModelUpdatingListeners(this.myModel);
+                this.notifyModelUpdated();
             },
             fireSomeTestEvents: function() {
                 this.someHandler.fireSomeModelUpdatingEvents(this.myModel);
+                this.notifyModelUpdated();
             },
             addOptionalListener: function() {
                 this.someListenerRegistration =
                         this.someHandler.register(test.SomeEventFoo.NAME, this.someOptionalCallback.bind(this));
+                this.notifyModelUpdated();
             },
             removeOptionalListener: function() {
                 if (this.someListenerRegistration) {
                     this.someHandler.unregister(this.someListenerRegistration);
                 }
+                this.notifyModelUpdated();
             },
             someOptionalCallback: function(e) {
                 this.myModel.updateMyModel();
                 this.optionalEventResult = e.doStuff();
+                this.notifyModelUpdated();
+            },
+            notifyModelUpdated: function() {
+                // Polymer 1.0 no longer supports real data binding but now has a crude
+                // (like JavaBeans PropertyChangeEvent) mechanism that needs manual intervention
+                this.notifyPath('myModel.someProperty', this.myModel.someProperty);
+                this.notifyPath('myModel.otherProperty', this.myModel.otherProperty);
+                this.notifyPath('myModel.someArray', this.myModel.someArray);
+                this.notifyPath('myModel.otherArray', this.myModel.otherArray);
             }
         });
     }
@@ -77,41 +105,44 @@
 </head>
 <body>
 
-<polymer-element name="some-test">
+<dom-module id="some-test">
     <template>
         <h1>GWT JSInterop & Polymer Test</h1>
         <hr/>
-        <span>MyModel#someProperty: {{myModel.someProperty}}</span>
+        MyModel#someProperty: <span>{{myModel.someProperty}}</span>
         <br/>
-        <span>MyModel#otherProperty: {{myModel.otherProperty}}</span>
+        Enter value for MyModel#someProperty: <input value="{{myModel.someProperty::input}}"/>
         <br/>
-        <template repeat="{{e in myModel.someArray}}">
-            <span>MyModel#someArray: {{e}}</span>
+        MyModel#otherProperty: <span>{{myModel.otherProperty}}</span>
+        <br/>
+        <template is="dom-repeat" items="{{myModel.someArray}}">
+            MyModel#someArray: <span>{{item}}</span>
             <br/>
         </template>
-        <template repeat="{{e in myModel.otherArray}}">
-            <span>MyModel#otherArray: MyOtherModel {{e.someNumber}}</span>
+        <template is="dom-repeat" items="{{myModel.otherArray}}">
+            MyModel#otherArray: MyOtherModel <span>{{item.someNumber}}</span>
             <br/>
         </template>
-        <button on-click="{{updateModel}}">Update model with random values</button>
+        <button on-click="updateModel">Update model with random values</button>
         <hr/>
-        <span>Callback result of SomeEvent#doStuff: {{someEventResult}}</span>
+        Callback result of SomeEvent#doStuff: <span>{{someEventResult}}</span>
         <br/>
-        <span>Optional callback result of SomeEvent#doStuff: {{optionalEventResult}}</span>
+        Optional callback result of SomeEvent#doStuff: <span>{{optionalEventResult}}</span>
         <br/>
-        <button on-click="{{fireFoo}}">Fire SomeEventFoo</button>
+        <button on-click="fireFoo">Fire SomeEventFoo</button>
         <br/>
-        <button on-click="{{fireBar}}">Fire SomeEventBar</button>
+        <button on-click="fireBar">Fire SomeEventBar</button>
         <br/>
-        <button on-click="{{registerSomeTestListeners}}">Register some Java listeners updating MyModel</button>
+        <button on-click="registerSomeTestListeners">Register some Java listeners updating MyModel</button>
         <br/>
-        <button on-click="{{fireSomeTestEvents}}">Fire some Java events updating MyModel</button>
+        <button on-click="fireSomeTestEvents">Fire some Java events updating MyModel</button>
         <br/>
-        <button on-click="{{addOptionalListener}}">Enable optional listener</button>
+        <button on-click="addOptionalListener">Enable optional listener</button>
         <br/>
-        <button on-click="{{removeOptionalListener}}">Disable optional listener</button>
+        <button on-click="removeOptionalListener">Disable optional listener</button>
     </template>
-</polymer-element>
+</dom-module>
+
 <some-test></some-test>
 
 </body>
